@@ -20,7 +20,7 @@ disallow_untyped_defs = true
 line-length = 120
 
 [project]
-name = "LibraryAPI"
+name = "libraryapi"
 version = "0.0.1"
 authors = [
     { name = "Sequew", email = "kryseyt@gmail.com" },
@@ -39,11 +39,11 @@ test = [
 lint = [
     "ruff"
 ]
-types_check = [
+types-checking = [
     "mypy"
 ]
 dev = [
-    "LibraryAPI[test, lint, types_check]"
+    "LibraryAPI[test, lint, types-checking]"
 ]
 
 [project.urls]
