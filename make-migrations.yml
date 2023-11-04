@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  libraryapi:
+    extends:
+      file: docker-compose.yml
+      service: libraryapi
+    volumes:
+      - ./alembic/versions/:/LibraryAPI/alembic/versions
+    entrypoint: "alembic revision --autogenerate"
+
+  postgres:
+    extends:
+      file: docker-compose.yml
+      service: postgres

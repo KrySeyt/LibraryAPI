@@ -8,6 +8,10 @@ from ..dependencies import get_db, get_db_stub, get_engine_stub
 
 
 db_uri = os.getenv("LIBRARYAPI_POSTGRESQL_URI")
+
+if not db_uri:
+    raise RuntimeError("No LIBRARYAPI_POSTGRESQL_URI environment variable")
+
 engine = create_engine(db_uri)
 
 app = FastAPI()

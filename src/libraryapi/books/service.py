@@ -28,7 +28,7 @@ class RDBMSBookServiceImp(BookServiceImp):
         book_model = self.crud.get_book(book_id)
 
         if not book_model:
-            return
+            return None
 
         return Book.model_validate(book_model)
 
