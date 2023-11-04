@@ -42,7 +42,9 @@ lint = [
 types_check = [
     "mypy"
 ]
-
+dev = [
+    "LibraryAPI[test, lint, types_check]"
+]
 
 [project.urls]
 "Homepage" = "https://github.com/KrySeyt/LibraryAPI"
