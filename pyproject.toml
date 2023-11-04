@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.mypy]
+strict = true
+warn_unused_configs = true
+check_untyped_defs = true
+follow_imports = "silent"
+warn_redundant_casts = true
+warn_unused_ignores = true
+disallow_any_generics = true
+no_implicit_reexport = true
+disallow_untyped_defs = true
+
+[tool.ruff]
+line-length = 120
+
+[project]
+name = "LibraryAPI"
+version = "0.0.1"
+authors = [
+    { name = "Sequew", email = "kryseyt@gmail.com" },
+]
+description = "API for online library"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest"
+]
+lint = [
+    "ruff"
+]
+types_check = [
+    "mypy"
+]
+
+
+[project.urls]
+"Homepage" = "https://github.com/KrySeyt/LibraryAPI"
