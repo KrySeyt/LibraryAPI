@@ -1,12 +1,11 @@
 from typing import Annotated, Generator
 
 from fastapi import Depends
-
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session
 
 
-def get_engine_stub() -> None:
+def get_engine_stub() -> Engine:
     raise NotImplementedError
 
 

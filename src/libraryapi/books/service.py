@@ -55,7 +55,13 @@ class BookService:
         return self.imp.add_book(book_in)
 
 
-class RDBMSBookServiceFactory:
+class BookServiceFactory(ABC):
+    @abstractmethod
+    def create_book_service(self) -> BookService:
+        raise NotImplementedError
+
+
+class RDBMSBookServiceFactory(BookServiceFactory):
     def __init__(self, session: Session) -> None:
         self.session = session
 
