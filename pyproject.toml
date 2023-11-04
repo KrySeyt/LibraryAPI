@@ -19,6 +19,8 @@ disallow_untyped_defs = true
 [tool.ruff]
 line-length = 120
 
+[tool.ale]
+
 [project]
 name = "libraryapi"
 version = "0.0.1"
@@ -29,7 +31,11 @@ description = "API for online library"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi",
+    "gunicorn",
     "uvicorn",
+    "sqlalchemy",
+    "alembic",
+    "psycopg2-binary"
 ]
 
 [project.optional-dependencies]
