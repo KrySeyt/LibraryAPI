@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from sqlalchemy import Engine
 from sqlalchemy.orm import Session
 
 from .schema import Book, BookIn
@@ -62,10 +63,11 @@ class BookServiceFactory(ABC):
 
 
 class RDBMSBookServiceFactory(BookServiceFactory):
-    def __init__(self, session: Session) -> None:
-        self.session = session
+    def __init__(self, engine: Engine) -> None:
+        self.engine = engine
 
     def create_book_service(self) -> BookService:
-        crud = BookCrud(self.session)
+        session = Session(self.engine)
+        crud = BookCrud(session)
         imp = RDBMSBookServiceImp(crud)
         return BookService(imp)

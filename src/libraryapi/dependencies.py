@@ -1,18 +1,15 @@
-from typing import Annotated, Generator
-
-from fastapi import Depends
-from sqlalchemy import Engine
-from sqlalchemy.orm import Session
+from typing import Callable, Any, NoReturn
 
 
-def get_engine_stub() -> Engine:
-    raise NotImplementedError
+class Stub:
+    def __init__(self, dependency: Callable[..., Any]) -> None:
+        self._dependency = dependency
 
+    def __call__(self) -> NoReturn:
+        raise NotImplementedError
 
-def get_db_stub() -> Session:
-    raise NotImplementedError
+    def __eq__(self, other: Any) -> bool:
+        return bool(self._dependency == other)
 
-
-def get_db(engine: Annotated[Engine, Depends(get_engine_stub)]) -> Generator[Session, None, None]:
-    with Session(engine) as session:
-        yield session
+    def __hash__(self) -> int:
+        return hash(self._dependency)

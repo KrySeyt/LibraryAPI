@@ -1,23 +1,22 @@
-import os
-
 from fastapi import FastAPI
 from sqlalchemy import create_engine
 
-from ..books.router import router as books_router
-from ..books.dependencies import get_book_service_stub, get_book_service
-from ..dependencies import get_db, get_db_stub, get_engine_stub
+from ..books.router import books_router
+from ..books.service import RDBMSBookServiceFactory, BookService
+from .config import get_database_config
 
 
-db_uri = os.getenv("LIBRARYAPI_POSTGRESQL_URI")
+def create_app() -> FastAPI:
+    db_config = get_database_config()
 
-if not db_uri:
-    raise RuntimeError("No LIBRARYAPI_POSTGRESQL_URI environment variable")
+    engine = create_engine(db_config.uri)
+    book_service_factory = RDBMSBookServiceFactory(engine)
 
-engine = create_engine(db_uri)
+    app = FastAPI()
+    app.include_router(books_router)
+    app.dependency_overrides[BookService] = lambda: book_service_factory.create_book_service()
 
-app = FastAPI()
-app.include_router(books_router)
+    return app
 
-app.dependency_overrides[get_db_stub] = get_db
-app.dependency_overrides[get_engine_stub] = lambda: engine
-app.dependency_overrides[get_book_service_stub] = get_book_service
+
+app = create_app()
