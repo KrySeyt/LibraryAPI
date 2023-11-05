@@ -31,15 +31,15 @@ class RDBMSBookServiceImp(BookServiceImp):
         if not book_model:
             return None
 
-        return Book.model_validate(book_model)
+        return Book(book_model.name, book_model.author, book_model.genre, book_model.release_year, book_model.id)
 
     def get_books(self) -> list[Book]:
         book_models = self.crud.get_books()
-        return [Book.model_validate(model) for model in book_models]
+        return [Book(model.name, model.author, model.genre, model.release_year, model.id) for model in book_models]
 
     def add_book(self, book_in: BookIn) -> Book:
         book_model = self.crud.add_book(book_in)
-        return Book.model_validate(book_model)
+        return Book(book_model.name, book_model.author, book_model.genre, book_model.release_year, book_model.id)
 
 
 class BookService:

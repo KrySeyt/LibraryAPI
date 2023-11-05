@@ -1,30 +1,25 @@
+from dataclasses import dataclass
 from datetime import date
 
-from pydantic import BaseModel, field_validator
 
-
-class BookBase(BaseModel):
+@dataclass
+class BookBase:
     name: str
     author: str
     genre: str
     release_year: date
 
-    @field_validator("name", "author", "genre")
-    @classmethod
-    def capitalize(cls, value: str) -> str:
-        return value.capitalize()
 
-    class Config:
-        from_attributes = True
-
-
+@dataclass
 class Book(BookBase):
     id: int
 
 
+@dataclass
 class BookIn(BookBase):
     pass
 
 
+@dataclass
 class BookOut(BookBase):
     id: int

@@ -1,3 +1,5 @@
+from dataclasses import asdict
+
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 
@@ -16,7 +18,7 @@ class BookCrud:
         return list(self.db.scalars(select(models.Book)).all())
 
     def add_book(self, book_in: schema.BookIn) -> models.Book:
-        book = models.Book(**book_in.model_dump())
+        book = models.Book(**asdict(book_in))
         self.db.add(book)
         self.db.commit()
         return book

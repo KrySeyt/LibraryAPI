@@ -13,3 +13,6 @@ class Stub:
 
     def __hash__(self) -> int:
         return hash(self._dependency)
+
+
+Dataclass = dict[str, Any]
