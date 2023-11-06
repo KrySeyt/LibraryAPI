@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Generator, Callable
 
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session
@@ -58,16 +59,17 @@ class BookService:
 
 class BookServiceFactory(ABC):
     @abstractmethod
-    def create_book_service(self) -> BookService:
+    def create_book_service(self) -> Generator[BookService, None, None]:
         raise NotImplementedError
 
 
 class RDBMSBookServiceFactory(BookServiceFactory):
-    def __init__(self, engine: Engine) -> None:
+    def __init__(self, engine: Engine, crud_factory: Callable[[Session], BookCrud]) -> None:
         self.engine = engine
+        self.crud_factory = crud_factory
 
-    def create_book_service(self) -> BookService:
-        session = Session(self.engine)
-        crud = BookCrud(session)
-        imp = RDBMSBookServiceImp(crud)
-        return BookService(imp)
+    def create_book_service(self) -> Generator[BookService, None, None]:
+        with Session(self.engine) as session:
+            crud = self.crud_factory(session)
+            imp = RDBMSBookServiceImp(crud)
+            yield BookService(imp)

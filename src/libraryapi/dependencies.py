@@ -16,3 +16,4 @@ class Stub:
 
 
 Dataclass = dict[str, Any]
+

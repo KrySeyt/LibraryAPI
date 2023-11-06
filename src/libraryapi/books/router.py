@@ -7,6 +7,7 @@ from .schema import BookIn, BookOut
 from .service import BookService
 from ..dependencies import Stub, Dataclass
 
+
 books_router = APIRouter(tags=["books"], prefix="/books")
 
 
@@ -25,7 +26,8 @@ def get_books(
         book_service: Annotated[BookService, Depends(Stub(BookService))],
 ) -> list[Dataclass]:
 
-    return [asdict(book) for book in book_service.get_books()]
+    books = book_service.get_books()
+    return [asdict(book) for book in books]
 
 
 @books_router.post("/", response_model=BookOut)
