@@ -22,3 +22,14 @@ class BookCrud:
         self.db.add(book)
         self.db.commit()
         return book
+
+    def delete_book(self, book_id: int) -> models.Book | None:
+        book = self.get_book(book_id)
+
+        if not book:
+            return None
+
+        self.db.delete(book)
+        self.db.commit()
+
+        return book

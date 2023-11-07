@@ -10,7 +10,7 @@ services:
     entrypoint: bash -c "
         pip install .[test] && \
         alembic upgrade head &&\
-        pytest
+        pytest -vvv
       "
 
   postgres:
