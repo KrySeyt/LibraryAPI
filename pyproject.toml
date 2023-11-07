@@ -33,7 +33,8 @@ dependencies = [
     "uvicorn",
     "sqlalchemy",
     "alembic",
-    "psycopg2-binary"
+    "psycopg2-binary",
+    "passlib[argon2]",
 ]
 
 [project.optional-dependencies]
@@ -45,7 +46,8 @@ lint = [
     "ruff"
 ]
 types-checking = [
-    "mypy"
+    "mypy",
+    "types-passlib"
 ]
 dev = [
     "LibraryAPI[test, lint, types-checking]"

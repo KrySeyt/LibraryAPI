@@ -21,6 +21,7 @@ class BookCrud:
         book = models.Book(**asdict(book_in))
         self.db.add(book)
         self.db.commit()
+        self.db.refresh(book)
         return book
 
     def update_book(self, book_id: int, book_in: schema.BookIn) -> models.Book | None:
@@ -34,6 +35,7 @@ class BookCrud:
             setattr(book, field, book_in_as_dict[field])
 
         self.db.commit()
+        self.db.refresh(book)
         
         return book
 
