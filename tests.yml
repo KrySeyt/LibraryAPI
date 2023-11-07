@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  libraryapi:
+    extends:
+      file: docker-compose.yml
+      service: libraryapi
+    volumes:
+      - ./tests/:/LibraryAPI/tests/
+    entrypoint: bash -c "
+        pip install .[test] && \
+        alembic upgrade head &&\
+        pytest
+      "
+
+  postgres:
+    extends:
+      file: docker-compose.yml
+      service: postgres
