@@ -40,6 +40,17 @@ def add_book(
     return asdict(book)
 
 
+@books_router.put("/{book_id}", response_model=BookOut | None)
+def update_book(
+        book_service: Annotated[BookService, Depends(Stub(BookService))],
+        book_id: int,
+        new_book_data: BookIn
+) -> Dataclass | None:
+
+    book = book_service.update_book(book_id, new_book_data)
+    return asdict(book) if book else None
+
+
 @books_router.delete("/{book_id}", response_model=BookOut | None)
 def delete_book(
         book_service: Annotated[BookService, Depends(Stub(BookService))],

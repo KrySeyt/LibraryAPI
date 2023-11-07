@@ -10,9 +10,9 @@ class BookBase:
     release_year: date
 
     def __post_init__(self) -> None:
-        self.name = self.name.capitalize()
-        self.author = self.author.capitalize()
-        self.genre = self.genre.capitalize()
+        self.name = f"{self.name[0].capitalize()}{self.name[1:]}"
+        self.author = f"{self.author[0].capitalize()}{self.author[1:]}"
+        self.genre = f"{self.genre[0].capitalize()}{self.genre[1:]}"
 
 
 @dataclass

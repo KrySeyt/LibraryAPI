@@ -22,6 +22,10 @@ class BookServiceImp(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def update_book(self, book_id: int, book_in: BookIn) -> Book | None:
+        raise NotImplementedError
+
+    @abstractmethod
     def delete_book(self, book_id: int) -> Book | None:
         raise NotImplementedError
 
@@ -46,6 +50,14 @@ class RDBMSBookServiceImp(BookServiceImp):
         book_model = self.crud.add_book(book_in)
         return Book(book_model.name, book_model.author, book_model.genre, book_model.release_year, book_model.id)
 
+    def update_book(self, book_id: int, book_in: BookIn) -> Book | None:
+        book_model = self.crud.update_book(book_id, book_in)
+
+        if not book_model:
+            return None
+
+        return Book(book_model.name, book_model.author, book_model.genre, book_model.release_year, book_model.id)
+
     def delete_book(self, book_id: int) -> Book | None:
         book_model = self.crud.delete_book(book_id)
 
@@ -67,6 +79,9 @@ class BookService:
 
     def add_book(self, book_in: BookIn) -> Book:
         return self.imp.add_book(book_in)
+
+    def update_book(self, book_id: int, book_in: BookIn) -> Book | None:
+        return self.imp.update_book(book_id, book_in)
 
     def delete_book(self, book_id: int) -> Book | None:
         return self.imp.delete_book(book_id)

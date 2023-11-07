@@ -1,28 +1,8 @@
 from fastapi.testclient import TestClient
 from libraryapi.main.api import app
 
+
 client = TestClient(app)
-
-
-def test_add_book():
-    input_data = {
-        "name": "string",
-        "author": "string",
-        "genre": "string",
-        "release_year": "2023-11-05"
-    }
-
-    expected_result = {
-        "id": 1,
-        "name": "String",
-        "author": "String",
-        "genre": "String",
-        "release_year": "2023-11-05"
-    }
-
-    response = client.post("/books", json=input_data)
-
-    assert response.json() == expected_result
 
 
 def test_get_book():
@@ -75,6 +55,57 @@ def test_get_books():
     assert response.json() == expected_result
 
 
+def test_add_book():
+    input_data = {
+        "name": "string",
+        "author": "string",
+        "genre": "string",
+        "release_year": "2023-11-05"
+    }
+
+    expected_result = {
+        "id": 1,
+        "name": "String",
+        "author": "String",
+        "genre": "String",
+        "release_year": "2023-11-05"
+    }
+
+    response = client.post("/books", json=input_data)
+
+    assert response.json() == expected_result
+
+
+def test_update_book():
+    input_data = {
+        "name": "string",
+        "author": "string",
+        "genre": "string",
+        "release_year": "2023-11-05"
+    }
+
+    book_id = client.post("/books", json=input_data).json()["id"]
+
+    updated_book = {
+        "name": "NewName",
+        "author": "String",
+        "genre": "newGenre",
+        "release_year": "2025-11-05"
+    }
+
+    expected_result = {
+        "id": 1,
+        "name": "NewName",
+        "author": "String",
+        "genre": "NewGenre",
+        "release_year": "2025-11-05"
+    }
+
+    response = client.put(f"/books/{book_id}", json=updated_book)
+
+    assert response.json() == expected_result
+
+
 def test_delete_book():
     input_data = {
         "name": "string",
@@ -94,11 +125,6 @@ def test_delete_book():
     }
 
     response = client.delete(f"/books/{book_id}")
-    print(response.request.method)
-    print(app.router.routes)
-    print(response.url)
-    print(response.status_code)
-    print(response.text)
 
     assert response.json() == expected_result
     assert not client.get("/books").json()

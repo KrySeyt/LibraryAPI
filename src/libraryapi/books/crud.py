@@ -23,6 +23,20 @@ class BookCrud:
         self.db.commit()
         return book
 
+    def update_book(self, book_id: int, book_in: schema.BookIn) -> models.Book | None:
+        book = self.get_book(book_id)
+
+        if not book:
+            return None
+
+        book_in_as_dict = asdict(book_in)
+        for field in book_in_as_dict:
+            setattr(book, field, book_in_as_dict[field])
+
+        self.db.commit()
+        
+        return book
+
     def delete_book(self, book_id: int) -> models.Book | None:
         book = self.get_book(book_id)
 
