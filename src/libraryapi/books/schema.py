@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from datetime import date
 
+from ..schema import BaseSchema
+
 
 @dataclass
-class BookBase:
+class BookBase(BaseSchema):
     name: str
     author: str
     genre: str
@@ -18,6 +20,7 @@ class BookBase:
 @dataclass
 class Book(BookBase):
     id: int
+    # seller: User | None
 
     def __post_init__(self) -> None:
         if self.id <= 0:
@@ -26,13 +29,22 @@ class Book(BookBase):
 
 @dataclass
 class BookIn(BookBase):
+    # seller_id: int | None
     pass
+
+    # def __post_init__(self) -> None:
+    #     if self.seller_id <= 0:
+    #         raise ValueError
 
 
 @dataclass
 class BookOut(BookBase):
     id: int
+    # seller_id: int
 
     def __post_init__(self) -> None:
         if self.id <= 0:
             raise ValueError
+
+        # if self.seller_id <= 0:
+        #     raise ValueError

@@ -40,15 +40,15 @@ class RDBMSBookServiceImp(BookServiceImp):
         if not book_model:
             return None
 
-        return Book(book_model.name, book_model.author, book_model.genre, book_model.release_year, book_model.id)
+        return Book.from_object(book_model)
 
     def get_books(self) -> list[Book]:
         book_models = self.crud.get_books()
-        return [Book(model.name, model.author, model.genre, model.release_year, model.id) for model in book_models]
+        return [Book.from_object(model) for model in book_models]
 
     def add_book(self, book_in: BookIn) -> Book:
         book_model = self.crud.add_book(book_in)
-        return Book(book_model.name, book_model.author, book_model.genre, book_model.release_year, book_model.id)
+        return Book.from_object(book_model)
 
     def update_book(self, book_id: int, book_in: BookIn) -> Book | None:
         book_model = self.crud.update_book(book_id, book_in)
@@ -56,7 +56,7 @@ class RDBMSBookServiceImp(BookServiceImp):
         if not book_model:
             return None
 
-        return Book(book_model.name, book_model.author, book_model.genre, book_model.release_year, book_model.id)
+        return Book.from_object(book_model)
 
     def delete_book(self, book_id: int) -> Book | None:
         book_model = self.crud.delete_book(book_id)
@@ -64,7 +64,7 @@ class RDBMSBookServiceImp(BookServiceImp):
         if not book_model:
             return None
 
-        return Book(book_model.name, book_model.author, book_model.genre, book_model.release_year, book_model.id)
+        return Book.from_object(book_model)
 
 
 class BookService:
