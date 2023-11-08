@@ -1,17 +1,23 @@
 from dataclasses import asdict
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from passlib.hash import argon2
+from fastapi import APIRouter, Depends, HTTPException, Response
 
-from .schema import UserIn, UserOut
+from .schema import UserIn, UserOut, User, LoginData
 from .service import UserService
+from .security import SESSION_DB, SESSION_EXPIRATION_TIME, hasher, create_session_id
+from .dependencies import get_current_user, get_session_id
 from ..dependencies import Stub, Dataclass
 
 
 users_router = APIRouter(tags=["users"], prefix="/users")
-security = OAuth2PasswordBearer(tokenUrl="/login")
+
+
+@users_router.get("/me", response_model=UserOut)
+def get_me(
+        current_user: Annotated[User, Depends(get_current_user)]
+) -> Dataclass:
+    return asdict(current_user)
 
 
 @users_router.get("/{user_id}", response_model=UserOut | None)
@@ -37,16 +43,32 @@ def register(
 @users_router.post("/login")
 def login(
         user_service: Annotated[UserService, Depends(Stub(UserService))],
-        user_data: Annotated[OAuth2PasswordRequestForm, Depends()]
-) -> dict[str, str]:
+        user_data: LoginData,
+        response: Response,
+) -> str:
 
     requested_user = user_service.get_user_by_username(user_data.username)
 
     if not requested_user:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
 
-    if argon2.verify(user_data.password, requested_user.hashed_password):  # type: ignore[no-untyped-call]
-        return {"access_token": user_data.username, "token_type": "bearer"}
+    if not hasher.verify(user_data.password, requested_user.hashed_password):  # type: ignore[no-untyped-call]
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
 
-    raise HTTPException(status_code=400, detail="Incorrect username or password")
+    session_id = create_session_id()
+    response.set_cookie(key="Authorization", value=session_id, expires=SESSION_EXPIRATION_TIME)
+    SESSION_DB[session_id] = requested_user.id
+
+    return "success"
+
+
+@users_router.post("/logout")
+def logout(
+        session_id: Annotated[str, Depends(get_session_id)],
+        response: Response,
+) -> Response:
+
+    response.delete_cookie("Authorization")
+    SESSION_DB.pop(session_id, None)
+    return response
 

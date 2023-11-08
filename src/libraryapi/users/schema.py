@@ -1,7 +1,6 @@
 from dataclasses import dataclass, InitVar, field
 
-from passlib.hash import argon2
-
+from .security import hasher
 from ..schema import BaseSchema
 
 
@@ -25,9 +24,15 @@ class UserIn(UserBase):
         if not password:
             raise ValueError("No password")
 
-        self.hashed_password = argon2.hash(password)  # type: ignore[no-untyped-call]
+        self.hashed_password = hasher.hash(password)  # type: ignore[no-untyped-call]
 
 
 @dataclass
 class UserOut(UserBase):
     id: int
+
+
+@dataclass
+class LoginData:
+    username: str
+    password: str

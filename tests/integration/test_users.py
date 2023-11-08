@@ -30,10 +30,10 @@ def test_login():
 
     client.post("/users", json=input_data)
 
-    response = client.post(f"/users/login", data=input_data)
+    response = client.post(f"/users/login", json=input_data)
 
-    assert "access_token" in response.json()
-    assert response.json()["token_type"] == "bearer"
+    assert "Authorization" in response.cookies
+    assert response.status_code == 200
 
 
 def test_register():
