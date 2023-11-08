@@ -18,10 +18,13 @@ class User(UserBase):
 
 @dataclass
 class UserIn(UserBase):
-    password: InitVar[str]
     hashed_password: str = field(init=False)
+    password: InitVar[str]
 
     def __post_init__(self, password: str) -> None:
+        if not password:
+            raise ValueError("No password")
+
         self.hashed_password = argon2.hash(password)  # type: ignore[no-untyped-call]
 
 
