@@ -22,6 +22,20 @@ def test_get_user():
     assert response.json() == expected_result
 
 
+def test_login():
+    input_data = {
+        "username": "testusername",
+        "password": "123456qwerty"
+    }
+
+    client.post("/users", json=input_data)
+
+    response = client.post(f"/users/login", data=input_data)
+
+    assert "access_token" in response.json()
+    assert response.json()["token_type"] == "bearer"
+
+
 def test_register():
     input_data = {
         "username": "testusername",

@@ -35,6 +35,7 @@ dependencies = [
     "alembic",
     "psycopg2-binary",
     "passlib[argon2]",
+    "python-multipart",
 ]
 
 [project.optional-dependencies]

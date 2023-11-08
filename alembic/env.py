@@ -8,6 +8,7 @@ from alembic import context
 
 from libraryapi.database import Base
 from libraryapi.books import models
+from libraryapi.users import models
 from libraryapi.main.config import get_database_config
 
 # this is the Alembic Config object, which provides

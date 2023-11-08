@@ -10,7 +10,11 @@ from .crud import UserCrud
 
 class UserServiceImp(ABC):
     @abstractmethod
-    def get_user(self, user_id: int) -> User | None:
+    def get_user_by_id(self, user_id: int) -> User | None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_user_by_username(self, username: str) -> User | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -22,8 +26,16 @@ class RDBMSUserServiceImp(UserServiceImp):
     def __init__(self, crud: UserCrud) -> None:
         self.crud = crud
 
-    def get_user(self, user_id: int) -> User | None:
-        user_model = self.crud.get_user(user_id)
+    def get_user_by_id(self, user_id: int) -> User | None:
+        user_model = self.crud.get_user_by_id(user_id)
+
+        if not user_model:
+            return None
+
+        return User.from_object(user_model)
+
+    def get_user_by_username(self, username: str) -> User | None:
+        user_model = self.crud.get_user_by_username(username)
 
         if not user_model:
             return None
@@ -39,8 +51,11 @@ class UserService:
     def __init__(self, implementation: UserServiceImp) -> None:
         self.imp = implementation
 
-    def get_user(self, user_id: int) -> User | None:
-        return self.imp.get_user(user_id)
+    def get_user_by_id(self, user_id: int) -> User | None:
+        return self.imp.get_user_by_id(user_id)
+
+    def get_user_by_username(self, username: str) -> User | None:
+        return self.imp.get_user_by_username(username)
 
     def register(self, user: UserIn) -> User:
         return self.imp.register(user)
