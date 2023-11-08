@@ -7,9 +7,11 @@ services:
       - "8000:8000"
     environment:
       - LIBRARYAPI_POSTGRESQL_URI=postgresql://postgres:postgres@postgres:5432/postgres
+      - LIBRARYAPI_REDIS_HOST=redis
     depends_on:
       postgres:
         condition: service_healthy
+
 
   postgres:
     image: postgres:latest
@@ -21,3 +23,9 @@ services:
       interval: 1s
       timeout: 1s
       retries: 30
+  
+  redis:
+    image: redis:latest
+    environment:
+      - REDIS_PASSWORD="redis"
+      - REDIS_PORT=6379

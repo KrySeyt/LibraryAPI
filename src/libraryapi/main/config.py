@@ -5,6 +5,7 @@ from dataclasses import dataclass
 logger = getLogger(__name__)
 
 POSTGRES_URI = "LIBRARYAPI_POSTGRESQL_URI"
+REDIS_HOST = "LIBRARYAPI_REDIS_HOST"
 
 
 class ConfigParseError(ValueError):
@@ -12,8 +13,13 @@ class ConfigParseError(ValueError):
 
 
 @dataclass
-class DatabaseConfig:
-    uri: str
+class PostgresConfig:
+    url: str
+
+
+@dataclass
+class RedisConfig:
+    host: str
 
 
 def get_env_var(key: str) -> str:
@@ -24,6 +30,11 @@ def get_env_var(key: str) -> str:
     return env_var
 
 
-def get_database_config() -> DatabaseConfig:
+def get_postgres_config() -> PostgresConfig:
     db_uri = get_env_var(POSTGRES_URI)
-    return DatabaseConfig(db_uri)
+    return PostgresConfig(db_uri)
+
+
+def get_redis_config() -> RedisConfig:
+    redis_host = get_env_var(REDIS_HOST)
+    return RedisConfig(redis_host)

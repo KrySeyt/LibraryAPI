@@ -9,12 +9,12 @@ from alembic import context
 from libraryapi.database import Base
 from libraryapi.books import models
 from libraryapi.users import models
-from libraryapi.main.config import get_database_config
+from libraryapi.main.config import get_postgres_config
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-config.set_main_option("sqlalchemy.url", get_database_config().uri)
+config.set_main_option("sqlalchemy.url", get_postgres_config().url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

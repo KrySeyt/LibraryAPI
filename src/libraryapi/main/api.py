@@ -7,12 +7,12 @@ from ..books.service import RDBMSBookServiceFactory, BookService
 from ..users.service import RDBMSUserServiceFactory, UserService
 from ..books.crud import BookCrud
 from ..users.crud import UserCrud
-from .config import get_database_config
+from .config import get_postgres_config
 
 
 def create_app() -> FastAPI:
-    db_config = get_database_config()
-    engine = create_engine(db_config.uri)
+    db_config = get_postgres_config()
+    engine = create_engine(db_config.url)
 
     book_service_factory = RDBMSBookServiceFactory(engine, BookCrud)
     user_service_factory = RDBMSUserServiceFactory(engine, UserCrud)

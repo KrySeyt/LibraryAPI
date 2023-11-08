@@ -3,11 +3,11 @@ from pytest import fixture
 from sqlalchemy import create_engine
 
 from libraryapi.database import Base
-from libraryapi.main.config import get_database_config
+from libraryapi.main.config import get_postgres_config
 
 
-db_config = get_database_config()
-engine = create_engine(db_config.uri)
+db_config = get_postgres_config()
+engine = create_engine(db_config.url)
 
 
 @fixture(scope="function", autouse=True)

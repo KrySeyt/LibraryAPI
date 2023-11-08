@@ -66,9 +66,10 @@ def login(
 def logout(
         session_id: Annotated[str, Depends(get_session_id)],
         response: Response,
-) -> Response:
+) -> str:
 
     response.delete_cookie("Authorization")
-    SESSION_DB.pop(session_id, None)
-    return response
+    SESSION_DB.delete(session_id)
+    
+    return "success"
 

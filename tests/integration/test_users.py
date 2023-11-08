@@ -36,6 +36,21 @@ def test_login():
     assert response.status_code == 200
 
 
+def test_logout():
+    input_data = {
+        "username": "testusername",
+        "password": "123456qwerty"
+    }
+
+    client.post("/users", json=input_data)
+    client.post(f"/users/login", json=input_data)
+
+    response = client.post(f"/users/logout", json=input_data)
+
+    assert "Authorization" not in response.cookies
+    assert response.status_code == 200
+
+
 def test_register():
     input_data = {
         "username": "testusername",

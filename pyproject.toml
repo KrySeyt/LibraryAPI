@@ -35,7 +35,7 @@ dependencies = [
     "alembic",
     "psycopg2-binary",
     "passlib[argon2]",
-    "python-multipart",
+    "redis[hiredis]",
 ]
 
 [project.optional-dependencies]

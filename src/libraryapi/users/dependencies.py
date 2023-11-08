@@ -26,16 +26,15 @@ def get_current_user(
         session_id: Annotated[str, Depends(get_session_id)]
 ) -> User:
 
-    user_id = SESSION_DB.get(session_id, None)
-
-    if not user_id:
+    if not SESSION_DB.exists(session_id):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user = user_service.get_user_by_id(user_id)
+    user_id = SESSION_DB.get(session_id)
+    user = user_service.get_user_by_id(user_id)  # type: ignore
 
     if not user:
         raise HTTPException(
