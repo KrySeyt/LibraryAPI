@@ -2,11 +2,12 @@ from dataclasses import asdict
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Response
+from passlib.ifc import PasswordHash
 
 from .schema import UserIn, UserOut, User, LoginData
 from .service import UserService
-from .security import SESSION_DB, SESSION_EXPIRATION_TIME, hasher, create_session_id
-from .dependencies import get_current_user, get_session_id
+from .security import SESSION_EXPIRATION_TIME, SessionProvider
+from .dependencies import get_current_user, get_session_id, get_user_in
 from ..dependencies import Stub, Dataclass
 
 
@@ -17,6 +18,7 @@ users_router = APIRouter(tags=["users"], prefix="/users")
 def get_me(
         current_user: Annotated[User, Depends(get_current_user)]
 ) -> Dataclass:
+
     return asdict(current_user)
 
 
@@ -33,7 +35,7 @@ def get_user(
 @users_router.post("/", response_model=UserOut)
 def register(
         user_service: Annotated[UserService, Depends(Stub(UserService))],
-        user_in: UserIn,
+        user_in: Annotated[UserIn, Depends(get_user_in)],
 ) -> Dataclass:
 
     user = user_service.register(user_in)
@@ -43,6 +45,8 @@ def register(
 @users_router.post("/login")
 def login(
         user_service: Annotated[UserService, Depends(Stub(UserService))],
+        session_provider: Annotated[SessionProvider, Depends(Stub(SessionProvider))],
+        password_hasher: Annotated[PasswordHash, Depends(Stub(PasswordHash))],
         user_data: LoginData,
         response: Response,
 ) -> str:
@@ -52,12 +56,11 @@ def login(
     if not requested_user:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
 
-    if not hasher.verify(user_data.password, requested_user.hashed_password):  # type: ignore[no-untyped-call]
+    if not password_hasher.verify(user_data.password, requested_user.hashed_password):
         raise HTTPException(status_code=400, detail="Incorrect username or password")
 
-    session_id = create_session_id()
+    session_id = session_provider.create_token(requested_user.id)
     response.set_cookie(key="Authorization", value=session_id, expires=SESSION_EXPIRATION_TIME)
-    SESSION_DB[session_id] = requested_user.id
 
     return "success"
 
@@ -65,11 +68,12 @@ def login(
 @users_router.post("/logout")
 def logout(
         session_id: Annotated[str, Depends(get_session_id)],
+        session_provider: Annotated[SessionProvider, Depends(Stub(SessionProvider))],
         response: Response,
 ) -> str:
 
     response.delete_cookie("Authorization")
-    SESSION_DB.delete(session_id)
+    session_provider.expire_token(session_id)
     
     return "success"
 

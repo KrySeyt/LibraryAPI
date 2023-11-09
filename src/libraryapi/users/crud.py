@@ -1,7 +1,9 @@
+from abc import ABC, abstractmethod
 from dataclasses import asdict
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from redis import Redis
 
 from . import models
 from . import schema
@@ -26,3 +28,38 @@ class UserCrud:
         self.db.refresh(user_model)
 
         return user_model
+
+
+class SessionCrud(ABC):
+    @abstractmethod
+    def get_user_id(self, token: str) -> int:
+        raise NotImplementedError
+
+    @abstractmethod
+    def session_exists(self, token: str) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    def add_session(self, token: str, user_id: int) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def delete_session(self, token: str) -> None:
+        raise NotImplementedError
+
+
+class RedisSessionCrud(SessionCrud):
+    def __init__(self, redis: Redis) -> None:
+        self.redis = redis
+
+    def session_exists(self, token: str) -> bool:
+        return self.redis.exists(token)  # type: ignore
+
+    def get_user_id(self, token: str) -> int:
+        return self.redis[token]  # type: ignore
+
+    def add_session(self, token: str, user_id: int) -> None:
+        self.redis[token] = user_id
+
+    def delete_session(self, token: str) -> None:
+        self.redis.delete(token)

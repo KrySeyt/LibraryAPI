@@ -1,17 +1,28 @@
 from uuid import uuid4
 
-from passlib.hash import argon2
-from redis import Redis
-from ..main.config import get_redis_config
+from .crud import SessionCrud
 
-
-hasher = argon2
-
-redis_host = get_redis_config().host
-SESSION_DB = Redis(host=redis_host, port=6379, decode_responses=True)
 
 SESSION_EXPIRATION_TIME = 60 * 60 * 24 * 7
 
 
-def create_session_id() -> str:
-    return str(uuid4())
+class AuthenticationError(ValueError):
+    pass
+
+
+class SessionProvider:
+    def __init__(self, crud: SessionCrud) -> None:
+        self.crud = crud
+
+    def create_token(self, user_id: int) -> str:
+        token = str(uuid4())
+        self.crud.add_session(token, user_id)
+        return token
+
+    def validate_token(self, token: str) -> int:
+        if not self.crud.session_exists(token):
+            raise AuthenticationError
+        return self.crud.get_user_id(token)
+
+    def expire_token(self, token: str) -> None:
+        self.crud.delete_session(token)

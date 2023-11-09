@@ -1,10 +1,12 @@
 from typing import Annotated
+from dataclasses import asdict
 
 from fastapi import Depends, HTTPException, status, Request
+from passlib.ifc import PasswordHash
 
-from .schema import User
+from .schema import User, RawUserIn, UserIn
 from .service import UserService
-from .security import SESSION_DB
+from .security import SessionProvider, AuthenticationError
 from ..dependencies import Stub
 
 
@@ -15,7 +17,6 @@ def get_session_id(request: Request) -> str:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
         )
 
     return session_id
@@ -23,24 +24,33 @@ def get_session_id(request: Request) -> str:
 
 def get_current_user(
         user_service: Annotated[UserService, Depends(Stub(UserService))],
+        session_provider: Annotated[SessionProvider, Depends(Stub(SessionProvider))],
         session_id: Annotated[str, Depends(get_session_id)]
 ) -> User:
 
-    if not SESSION_DB.exists(session_id):
+    try:
+        user_id = session_provider.validate_token(session_id)
+    except AuthenticationError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user_id = SESSION_DB.get(session_id)
-    user = user_service.get_user_by_id(user_id)  # type: ignore
+    user = user_service.get_user_by_id(user_id)
 
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
         )
 
     return user
+
+
+def get_user_in(
+        password_hasher: Annotated[PasswordHash, Depends(Stub(PasswordHash))],
+        raw_user: RawUserIn
+) -> UserIn:
+    user_data = asdict(raw_user)
+    user_data["hashed_password"] = password_hasher.hash(user_data.pop("password"))
+    return UserIn(**user_data)
