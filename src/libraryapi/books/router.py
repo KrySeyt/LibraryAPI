@@ -20,7 +20,11 @@ def get_book(
 ) -> Dataclass | None:
 
     book = book_service.get_book(book_id)
-    return asdict(book) if book else None
+
+    if not book:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+    return asdict(book)
 
 
 @books_router.get("/", response_model=list[BookOut])
@@ -50,7 +54,7 @@ def add_book(
 ) -> Dataclass:
 
     if book_in.owner_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_status.HTTP_403_FORBIDDEN_FORBIDDEN)
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
     book = book_service.add_book(book_in)
     return asdict(book)
@@ -68,6 +72,9 @@ def update_book(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
     requested_book = book_service.get_book(book_id)
+
+    if not requested_book:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
     if requested_book.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)

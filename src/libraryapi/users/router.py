@@ -29,7 +29,10 @@ def get_user(
 ) -> Dataclass | None:
 
     user = user_service.get_user_by_id(user_id)
-    return asdict(user) if user else None
+
+    if not user:
+        raise HTTPException(status_code=404)
+    return asdict(user)
 
 
 @users_router.post("/", response_model=UserOut, status_code=status.HTTP_201_CREATED)
