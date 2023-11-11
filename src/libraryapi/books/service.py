@@ -18,6 +18,10 @@ class BookServiceImp(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def get_user_books(self, user_id: int) -> list[Book]:
+        raise NotImplementedError
+
+    @abstractmethod
     def add_book(self, book_in: BookIn) -> Book:
         raise NotImplementedError
 
@@ -44,6 +48,10 @@ class RDBMSBookServiceImp(BookServiceImp):
 
     def get_books(self) -> list[Book]:
         book_models = self.crud.get_books()
+        return [Book.from_object(model) for model in book_models]
+
+    def get_user_books(self, user_id: int) -> list[Book]:
+        book_models = self.crud.get_user_books(user_id)
         return [Book.from_object(model) for model in book_models]
 
     def add_book(self, book_in: BookIn) -> Book:
@@ -76,6 +84,9 @@ class BookService:
 
     def get_books(self) -> list[Book]:
         return self.imp.get_books()
+
+    def get_user_books(self, user_id: int) -> list[Book]:
+        return self.imp.get_user_books(user_id)
 
     def add_book(self, book_in: BookIn) -> Book:
         return self.imp.add_book(book_in)

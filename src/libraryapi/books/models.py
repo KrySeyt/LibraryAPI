@@ -1,8 +1,21 @@
 from datetime import date
+from typing import TYPE_CHECKING
 
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import ForeignKey, Table, Column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..database import Base
+
+if TYPE_CHECKING:
+    from ..users.models import User
+
+
+books_users_table = Table(
+    "books_users",
+    Base.metadata,
+    Column("books_id", ForeignKey("books.id"), primary_key=True),
+    Column("users_id", ForeignKey("users.id"), primary_key=True),
+)
 
 
 class Book(Base):
@@ -14,3 +27,11 @@ class Book(Base):
     author: Mapped[str]
     genre: Mapped[str]
     release_year: Mapped[date]
+
+    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    owner: Mapped["User"] = relationship(back_populates="owned_books")
+
+    purchasers: Mapped[list["User"]] = relationship(
+        secondary=books_users_table,
+        back_populates="purchased_books",
+    )

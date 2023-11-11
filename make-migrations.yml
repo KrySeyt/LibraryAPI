@@ -7,7 +7,10 @@ services:
       service: libraryapi
     volumes:
       - ./alembic/versions/:/LibraryAPI/alembic/versions
-    entrypoint: "alembic revision --autogenerate"
+    entrypoint: bash -c 
+      "alembic upgrade head && \
+       alembic revision --autogenerate \
+       "
 
   postgres:
     extends:

@@ -17,6 +17,10 @@ class BookCrud:
     def get_books(self) -> list[models.Book]:
         return list(self.db.scalars(select(models.Book)).all())
 
+    def get_user_books(self, user_id: int) -> list[models.Book]:
+        stmt = select(models.Book).where(models.Book.owner_id == user_id)
+        return list(self.db.scalars(stmt).all())
+
     def add_book(self, book_in: schema.BookIn) -> models.Book:
         book = models.Book(**asdict(book_in))
         self.db.add(book)

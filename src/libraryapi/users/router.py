@@ -76,4 +76,3 @@ def logout(
     session_provider.expire_token(session_id)
     
     return "success"
-

@@ -30,6 +30,16 @@ def get_books(
     return [asdict(book) for book in books]
 
 
+@books_router.get("/user/{user_id}", response_model=list[BookOut])
+def get_user_books(
+        book_service: Annotated[BookService, Depends(Stub(BookService))],
+        user_id: int
+) -> list[Dataclass]:
+
+    books = book_service.get_user_books(user_id)
+    return [asdict(book) for book in books]
+
+
 @books_router.post("/", response_model=BookOut)
 def add_book(
         book_service: Annotated[BookService, Depends(Stub(BookService))],
