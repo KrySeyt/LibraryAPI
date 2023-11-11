@@ -1,10 +1,4 @@
-from fastapi.testclient import TestClient
-from libraryapi.main.api import app
-
-client = TestClient(app)
-
-
-def test_get_book(create_user):
+def test_get_book(authorized_client):
     input_data = {
         "name": "string",
         "author": "string",
@@ -13,7 +7,7 @@ def test_get_book(create_user):
         "owner_id": 1,
     }
 
-    client.post("/books", json=input_data)
+    authorized_client.post("/books", json=input_data)
 
     expected_result = {
         "id": 1,
@@ -24,12 +18,12 @@ def test_get_book(create_user):
         "owner_id": 1,
     }
 
-    response = client.get("/books/1")
+    response = authorized_client.get("/books/1")
 
     assert response.json() == expected_result
 
 
-def test_get_books(create_user):
+def test_get_books(authorized_client, client):
     input_data = {
         "name": "string",
         "author": "string",
@@ -39,7 +33,7 @@ def test_get_books(create_user):
     }
 
     for _ in range(10):
-        client.post("/books", json=input_data)
+        authorized_client.post("/books", json=input_data)
 
     expected_result = [
         {
@@ -58,7 +52,7 @@ def test_get_books(create_user):
     assert response.json() == expected_result
 
 
-def test_get_user_books(create_user):
+def test_get_user_books(authorized_client, client):
     input_data = [
         {
             "name": "string",
@@ -77,7 +71,7 @@ def test_get_user_books(create_user):
     ]
 
     for data in input_data:
-        client.post("/books", json=data).json()
+        authorized_client.post("/books", json=data).json()
 
     expected_result = [
         {
@@ -103,7 +97,7 @@ def test_get_user_books(create_user):
     assert response.json() == expected_result
 
 
-def test_add_book(create_user):
+def test_add_book(authorized_client):
     input_data = {
         "name": "string",
         "author": "string",
@@ -121,12 +115,12 @@ def test_add_book(create_user):
         "owner_id": 1,
     }
 
-    response = client.post("/books", json=input_data)
+    response = authorized_client.post("/books", json=input_data)
 
     assert response.json() == expected_result
 
 
-def test_update_book(create_user):
+def test_add_book_unauthorized(client):
     input_data = {
         "name": "string",
         "author": "string",
@@ -135,7 +129,21 @@ def test_update_book(create_user):
         "owner_id": 1,
     }
 
-    book_id = client.post("/books", json=input_data).json()["id"]
+    response = client.post("/books", json=input_data)
+
+    assert response.status_code == 401
+
+
+def test_update_book(authorized_client):
+    input_data = {
+        "name": "string",
+        "author": "string",
+        "genre": "string",
+        "release_year": "2023-11-05",
+        "owner_id": 1,
+    }
+
+    book_id = authorized_client.post("/books", json=input_data).json()["id"]
 
     updated_book = {
         "name": "NewName",
@@ -154,12 +162,12 @@ def test_update_book(create_user):
         "owner_id": 1,
     }
 
-    response = client.put(f"/books/{book_id}", json=updated_book)
+    response = authorized_client.put(f"/books/{book_id}", json=updated_book)
 
     assert response.json() == expected_result
 
 
-def test_delete_book():
+def test_delete_book(client):
     input_user_data = {
         "username": "testusername",
         "password": "123456qwerty"
@@ -193,14 +201,13 @@ def test_delete_book():
     assert not client.get("/books").json()
 
 
-def test_delete_book_without_permission(create_user):
+def test_delete_book_without_permission(authorized_client, client):
     user2_data = {
         "username": "user",
         "password": "password"
     }
 
-    current_user = client.post("/users", json=user2_data).json()
-    assert current_user["id"] != 1
+    client.post("/users", json=user2_data).json()
 
     book_input_data = {
         "name": "string",
@@ -219,7 +226,7 @@ def test_delete_book_without_permission(create_user):
         "id": 1,
     }
 
-    book_id = client.post("/books", json=book_input_data).json()["id"]
+    book_id = authorized_client.post("/books", json=book_input_data).json()["id"]
 
     client.post("/users/login", json=user2_data)
     response = client.delete(f"/books/{book_id}")

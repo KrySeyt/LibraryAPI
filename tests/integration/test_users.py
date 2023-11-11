@@ -1,11 +1,4 @@
-from fastapi.testclient import TestClient
-from libraryapi.main.api import app
-
-
-client = TestClient(app)
-
-
-def test_get_user():
+def test_get_user(client):
     input_data = {
         "username": "testusername",
         "password": "123456qwerty"
@@ -22,7 +15,7 @@ def test_get_user():
     assert response.json() == expected_result
 
 
-def test_login():
+def test_login(client):
     input_data = {
         "username": "testusername",
         "password": "123456qwerty"
@@ -36,7 +29,7 @@ def test_login():
     assert response.status_code == 200
 
 
-def test_logout():
+def test_logout(client):
     input_data = {
         "username": "testusername",
         "password": "123456qwerty"
@@ -51,7 +44,7 @@ def test_logout():
     assert response.status_code == 200
 
 
-def test_register():
+def test_register(client):
     input_data = {
         "username": "testusername",
         "password": "123456qwerty"

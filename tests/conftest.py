@@ -11,8 +11,6 @@ from libraryapi.main.config import get_postgres_config
 db_config = get_postgres_config()
 engine = create_engine(db_config.url)
 
-client = TestClient(app)
-
 
 @fixture(scope="function", autouse=True)
 def clear_db():
@@ -21,10 +19,23 @@ def clear_db():
 
 
 @fixture
-def create_user():
+def user(client) -> dict[str, str]:
     input_data = {
         "username": "testusername",
         "password": "123456qwerty"
     }
 
-    response = client.post("/users", json=input_data)
+    client.post("/users", json=input_data)
+
+    return input_data
+
+
+@fixture
+def authorized_client(user, client) -> TestClient:
+    client.post("/users/login", json=user)
+    return client
+
+
+@fixture
+def client() -> TestClient:
+    return TestClient(app)

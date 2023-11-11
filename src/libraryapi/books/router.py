@@ -45,8 +45,12 @@ def get_user_books(
 @books_router.post("/", response_model=BookOut)
 def add_book(
         book_service: Annotated[BookService, Depends(Stub(BookService))],
+        current_user: Annotated[User, Depends(get_current_user)],
         book_in: BookIn,
 ) -> Dataclass:
+
+    if book_in.owner_id != current_user.id:
+        raise HTTPException(status_code=403)
 
     book = book_service.add_book(book_in)
     return asdict(book)

@@ -18,7 +18,7 @@ class BookBase(BaseSchema):
         self.genre = f"{self.genre[0].capitalize()}{self.genre[1:]}"
 
         if self.owner_id <= 0:
-            raise ValueError
+            raise NotImplementedError
 
 
 @dataclass
