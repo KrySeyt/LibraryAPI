@@ -21,6 +21,7 @@ def test_get_book(authorized_client):
     response = authorized_client.get("/books/1")
 
     assert response.json() == expected_result
+    assert response.status_code == 200
 
 
 def test_get_books(authorized_client, client):
@@ -50,6 +51,7 @@ def test_get_books(authorized_client, client):
     response = client.get("/books")
 
     assert response.json() == expected_result
+    assert response.status_code == 200
 
 
 def test_get_user_books(authorized_client, client):
@@ -95,6 +97,7 @@ def test_get_user_books(authorized_client, client):
     response = client.get("/books/user/1")
 
     assert response.json() == expected_result
+    assert response.status_code == 200
 
 
 def test_add_book(authorized_client):
@@ -118,6 +121,7 @@ def test_add_book(authorized_client):
     response = authorized_client.post("/books", json=input_data)
 
     assert response.json() == expected_result
+    assert response.status_code == 201
 
 
 def test_add_book_unauthorized(client):
@@ -165,6 +169,43 @@ def test_update_book(authorized_client):
     response = authorized_client.put(f"/books/{book_id}", json=updated_book)
 
     assert response.json() == expected_result
+    assert response.status_code == 200
+
+
+def test_update_book_unauthorized(authorized_client, client):
+    input_data = {
+        "name": "string",
+        "author": "string",
+        "genre": "string",
+        "release_year": "2023-11-05",
+        "owner_id": 1,
+    }
+
+    book_id = authorized_client.post("/books", json=input_data).json()["id"]
+
+    updated_book = {
+        "name": "NewName",
+        "author": "String",
+        "genre": "newGenre",
+        "release_year": "2025-11-05",
+        "owner_id": 1,
+    }
+
+    response = client.put(f"/books/{book_id}", json=updated_book)
+    assert response.status_code == 401
+
+    user2_data = {
+        "username": "sadasdfsdf",
+        "password": "1232353fd",
+    }
+
+    response = client.post("/users", json=user2_data)
+    assert response.status_code == 201
+
+    client.post("/users/login", json=user2_data)
+
+    response = client.put(f"/books/{book_id}", json=updated_book)
+    assert response.status_code == 403
 
 
 def test_delete_book(client):

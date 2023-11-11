@@ -31,11 +31,12 @@ def user(client) -> dict[str, str]:
 
 
 @fixture
-def authorized_client(user, client) -> TestClient:
+def authorized_client(user) -> TestClient:
+    client = TestClient(app)
     client.post("/users/login", json=user)
     return client
 
 
-@fixture
+@fixture()
 def client() -> TestClient:
     return TestClient(app)

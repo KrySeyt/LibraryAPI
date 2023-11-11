@@ -13,6 +13,7 @@ def test_get_user(client):
 
     response = client.get(f"/users/{user_id}")
     assert response.json() == expected_result
+    assert response.status_code == 200
 
 
 def test_login(client):
@@ -58,3 +59,4 @@ def test_register(client):
     response = client.post("/users", json=input_data)
 
     assert response.json() == expected_result
+    assert response.status_code == 201

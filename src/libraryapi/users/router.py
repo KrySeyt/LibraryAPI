@@ -1,7 +1,7 @@
 from dataclasses import asdict
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from passlib.ifc import PasswordHash
 
 from .schema import UserIn, UserOut, User, LoginData
@@ -32,7 +32,7 @@ def get_user(
     return asdict(user) if user else None
 
 
-@users_router.post("/", response_model=UserOut)
+@users_router.post("/", response_model=UserOut, status_code=status.HTTP_201_CREATED)
 def register(
         user_service: Annotated[UserService, Depends(Stub(UserService))],
         user_in: Annotated[UserIn, Depends(get_user_in)],

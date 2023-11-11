@@ -1,7 +1,7 @@
 from dataclasses import asdict
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from .schema import BookIn, BookOut
 from .service import BookService
@@ -42,7 +42,7 @@ def get_user_books(
     return [asdict(book) for book in books]
 
 
-@books_router.post("/", response_model=BookOut)
+@books_router.post("/", response_model=BookOut, status_code=status.HTTP_201_CREATED)
 def add_book(
         book_service: Annotated[BookService, Depends(Stub(BookService))],
         current_user: Annotated[User, Depends(get_current_user)],
@@ -50,7 +50,7 @@ def add_book(
 ) -> Dataclass:
 
     if book_in.owner_id != current_user.id:
-        raise HTTPException(status_code=403)
+        raise HTTPException(status_code=status.HTTP_status.HTTP_403_FORBIDDEN_FORBIDDEN)
 
     book = book_service.add_book(book_in)
     return asdict(book)
@@ -59,9 +59,18 @@ def add_book(
 @books_router.put("/{book_id}", response_model=BookOut | None)
 def update_book(
         book_service: Annotated[BookService, Depends(Stub(BookService))],
+        current_user: Annotated[User, Depends(get_current_user)],
         book_id: int,
         new_book_data: BookIn
 ) -> Dataclass | None:
+
+    if new_book_data.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+
+    requested_book = book_service.get_book(book_id)
+
+    if requested_book.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
     book = book_service.update_book(book_id, new_book_data)
     return asdict(book) if book else None
@@ -79,7 +88,7 @@ def delete_book(
         return None
 
     if book.owner_id != current_user.id:
-        raise HTTPException(status_code=403)
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
     book_service.delete_book(book_id)
 
