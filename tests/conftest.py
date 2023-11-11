@@ -21,7 +21,7 @@ def clear_db():
 
 
 @fixture
-def user():
+def create_user():
     input_data = {
         "username": "testusername",
         "password": "123456qwerty"

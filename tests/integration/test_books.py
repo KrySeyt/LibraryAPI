@@ -4,7 +4,7 @@ from libraryapi.main.api import app
 client = TestClient(app)
 
 
-def test_get_book(user):
+def test_get_book(create_user):
     input_data = {
         "name": "string",
         "author": "string",
@@ -29,7 +29,7 @@ def test_get_book(user):
     assert response.json() == expected_result
 
 
-def test_get_books(user):
+def test_get_books(create_user):
     input_data = {
         "name": "string",
         "author": "string",
@@ -58,7 +58,7 @@ def test_get_books(user):
     assert response.json() == expected_result
 
 
-def test_get_user_books(user):
+def test_get_user_books(create_user):
     input_data = [
         {
             "name": "string",
@@ -103,7 +103,7 @@ def test_get_user_books(user):
     assert response.json() == expected_result
 
 
-def test_add_book(user):
+def test_add_book(create_user):
     input_data = {
         "name": "string",
         "author": "string",
@@ -126,7 +126,7 @@ def test_add_book(user):
     assert response.json() == expected_result
 
 
-def test_update_book(user):
+def test_update_book(create_user):
     input_data = {
         "name": "string",
         "author": "string",
@@ -159,7 +159,15 @@ def test_update_book(user):
     assert response.json() == expected_result
 
 
-def test_delete_book(user):
+def test_delete_book():
+    input_user_data = {
+        "username": "testusername",
+        "password": "123456qwerty"
+    }
+
+    client.post("/users", json=input_user_data)
+    client.post("/users/login", json=input_user_data)
+
     input_data = {
         "name": "string",
         "author": "string",
@@ -183,3 +191,38 @@ def test_delete_book(user):
 
     assert response.json() == expected_result
     assert not client.get("/books").json()
+
+
+def test_delete_book_without_permission(create_user):
+    user2_data = {
+        "username": "user",
+        "password": "password"
+    }
+
+    current_user = client.post("/users", json=user2_data).json()
+    assert current_user["id"] != 1
+
+    book_input_data = {
+        "name": "string",
+        "author": "string",
+        "genre": "string",
+        "release_year": "2023-11-05",
+        "owner_id": 1,
+    }
+
+    expected_result = {
+        "name": "String",
+        "author": "String",
+        "genre": "String",
+        "release_year": "2023-11-05",
+        "owner_id": 1,
+        "id": 1,
+    }
+
+    book_id = client.post("/books", json=book_input_data).json()["id"]
+
+    client.post("/users/login", json=user2_data)
+    response = client.delete(f"/books/{book_id}")
+
+    assert client.get("/books/1").json() == expected_result
+    assert response.status_code == 403

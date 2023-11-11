@@ -1,11 +1,13 @@
 from dataclasses import asdict
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from .schema import BookIn, BookOut
 from .service import BookService
 from ..dependencies import Stub, Dataclass
+from ..users.dependencies import get_current_user
+from ..users.schema import User
 
 
 books_router = APIRouter(tags=["books"], prefix="/books")
@@ -64,8 +66,17 @@ def update_book(
 @books_router.delete("/{book_id}", response_model=BookOut | None)
 def delete_book(
         book_service: Annotated[BookService, Depends(Stub(BookService))],
+        current_user: Annotated[User, Depends(get_current_user)],
         book_id: int
 ) -> Dataclass | None:
+    book = book_service.get_book(book_id)
 
-    book = book_service.delete_book(book_id)
-    return asdict(book) if book else None
+    if not book:
+        return None
+
+    if book.owner_id != current_user.id:
+        raise HTTPException(status_code=403)
+
+    book_service.delete_book(book_id)
+
+    return asdict(book)
