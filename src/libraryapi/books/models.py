@@ -27,6 +27,7 @@ class Book(Base):
     author: Mapped[str]
     genre: Mapped[str]
     release_year: Mapped[date]
+    verified: Mapped[bool] = mapped_column(default=False)
 
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     owner: Mapped["User"] = relationship(back_populates="owned_books")

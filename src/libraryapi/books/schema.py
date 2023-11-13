@@ -24,6 +24,7 @@ class BookBase(BaseSchema):
 @dataclass
 class Book(BookBase):
     id: int
+    verified: bool
 
     def __post_init__(self) -> None:
         if self.id <= 0:
@@ -38,6 +39,7 @@ class BookIn(BookBase):
 @dataclass
 class BookOut(BookBase):
     id: int
+    verified: bool
 
     def __post_init__(self) -> None:
         if self.id <= 0:

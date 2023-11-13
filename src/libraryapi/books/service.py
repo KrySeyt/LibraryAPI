@@ -18,11 +18,19 @@ class BookServiceImp(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def get_verified_books(self, skip: int, limit: int) -> list[Book]:
+        raise NotImplementedError
+
+    @abstractmethod
     def get_user_books(self, user_id: int) -> list[Book]:
         raise NotImplementedError
 
     @abstractmethod
     def get_purchased_books(self, user_id: int) -> list[Book]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def verify_book(self, book_id: int) -> Book | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -58,6 +66,10 @@ class RDBMSBookServiceImp(BookServiceImp):
         book_models = self.crud.get_books(skip, limit)
         return [Book.from_object(model) for model in book_models]
 
+    def get_verified_books(self, skip: int, limit: int) -> list[Book]:
+        book_models = self.crud.get_verified_books(skip, limit)
+        return [Book.from_object(model) for model in book_models]
+
     def get_user_books(self, user_id: int) -> list[Book]:
         book_models = self.crud.get_user_books(user_id)
         return [Book.from_object(model) for model in book_models]
@@ -65,6 +77,14 @@ class RDBMSBookServiceImp(BookServiceImp):
     def get_purchased_books(self, user_id: int) -> list[Book]:
         book_models = self.crud.get_purchased_books(user_id)
         return [Book.from_object(model) for model in book_models]
+
+    def verify_book(self, book_id: int) -> Book | None:
+        book_model = self.crud.verify_book(book_id)
+
+        if not book_model:
+            return None
+
+        return Book.from_object(book_model)
 
     def add_book(self, book_in: BookIn) -> Book:
         book_model = self.crud.add_book(book_in)
@@ -105,11 +125,17 @@ class BookService:
     def get_books(self, skip: int, limit: int) -> list[Book]:
         return self.imp.get_books(skip, limit)
 
+    def get_verified_books(self, skip: int, limit: int) -> list[Book]:
+        return self.imp.get_verified_books(skip, limit)
+
     def get_user_books(self, user_id: int) -> list[Book]:
         return self.imp.get_user_books(user_id)
 
     def get_purchased_books(self, user_id: int) -> list[Book]:
         return self.imp.get_purchased_books(user_id)
+
+    def verify_book(self, book_id: int) -> Book | None:
+        return self.imp.verify_book(book_id)
 
     def add_book(self, book_in: BookIn) -> Book:
         return self.imp.add_book(book_in)

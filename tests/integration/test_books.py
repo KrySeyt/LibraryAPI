@@ -16,6 +16,7 @@ def test_get_book(authorized_client, client):
         "genre": "String",
         "release_year": "2023-11-05",
         "owner_id": 1,
+        "verified": False
     }
 
     response = client.get(f"/books/{book_id}")
@@ -24,7 +25,7 @@ def test_get_book(authorized_client, client):
     assert response.status_code == 200
 
 
-def test_get_books(authorized_client, client):
+def test_get_all_books(authorized_client, client):
     input_data = {
         "name": "string",
         "author": "string",
@@ -44,11 +45,56 @@ def test_get_books(authorized_client, client):
             "genre": "String",
             "release_year": "2023-11-05",
             "owner_id": 1,
+            "verified": False
         }
         for i in range(1, 11)
     ]
 
-    response = client.get("/books", params={"skip": 0, "limit": 100})
+    response = client.get("/books/all", params={"skip": 0, "limit": 100})
+
+    assert response.json() == expected_result
+    assert response.status_code == 200
+
+
+def test_get_verified_books(authorized_client, client):
+    input_data = {
+        "name": "string",
+        "author": "string",
+        "genre": "string",
+        "release_year": "2023-11-05",
+        "owner_id": 1,
+    }
+
+    for _ in range(10):
+        authorized_client.post("/books", json=input_data)
+
+    response = authorized_client.post("/books/verify/4")
+    assert response.status_code == 200
+
+    authorized_client.post("/books/verify/9")
+
+    expected_result = [
+        {
+            "id": 9,
+            "name": "String",
+            "author": "String",
+            "genre": "String",
+            "release_year": "2023-11-05",
+            "owner_id": 1,
+            "verified": True
+        },
+        {
+            "id": 4,
+            "name": "String",
+            "author": "String",
+            "genre": "String",
+            "release_year": "2023-11-05",
+            "owner_id": 1,
+            "verified": True
+        },
+    ]
+
+    response = client.get("/books/verified", params={"skip": 0, "limit": 100})
 
     assert response.json() == expected_result
     assert response.status_code == 200
@@ -83,6 +129,7 @@ def test_get_user_books(authorized_client, client):
             "release_year": "2023-11-05",
             "owner_id": 1,
             "id": 1,
+            "verified": False
         },
         {
             "name": "String",
@@ -90,7 +137,8 @@ def test_get_user_books(authorized_client, client):
             "genre": "String",
             "release_year": "2023-11-05",
             "owner_id": 1,
-            "id": 2
+            "id": 2,
+            "verified": False
         },
     ]
 
@@ -116,6 +164,7 @@ def test_add_book(authorized_client):
         "genre": "String",
         "release_year": "2023-11-05",
         "owner_id": 1,
+        "verified": False,
     }
 
     response = authorized_client.post("/books", json=input_data)
@@ -164,6 +213,7 @@ def test_update_book(authorized_client):
         "genre": "NewGenre",
         "release_year": "2025-11-05",
         "owner_id": 1,
+        "verified": False,
     }
 
     response = authorized_client.put(f"/books/{book_id}", json=updated_book)
@@ -234,12 +284,13 @@ def test_delete_book(client):
         "genre": "String",
         "release_year": "2023-11-05",
         "owner_id": 1,
+        "verified": False,
     }
 
     response = client.delete(f"/books/{book_id}")
 
     assert response.json() == expected_result
-    assert not client.get("/books", params={"skip": 0, "limit": 100}).json()
+    assert not client.get("/books/all", params={"skip": 0, "limit": 100}).json()
 
 
 def test_delete_book_without_permission(authorized_client, client):
@@ -265,6 +316,7 @@ def test_delete_book_without_permission(authorized_client, client):
         "release_year": "2023-11-05",
         "owner_id": 1,
         "id": 1,
+        "verified": False,
     }
 
     book_id = authorized_client.post("/books", json=book_input_data).json()["id"]
@@ -302,6 +354,7 @@ def test_buy_book(authorized_client, client):
         "release_year": "2023-11-05",
         "owner_id": 1,
         "id": 1,
+        "verified": False,
     }
 
     response = client.post(f"/books/purchase/{book_id}")
@@ -331,9 +384,9 @@ def test_get_user_purchased_books(authorized_client, client):
         "release_year": "2023-11-05",
         "owner_id": 1,
         "id": 1,
+        "verified": False,
     }
 
     response = client.get("/books/purchased/1")
-    print(response.json())
     assert excepted_result in response.json()
     assert response.status_code == 200

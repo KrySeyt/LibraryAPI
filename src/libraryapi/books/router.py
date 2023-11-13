@@ -13,6 +13,28 @@ from ..users.schema import User
 books_router = APIRouter(tags=["books"], prefix="/books")
 
 
+@books_router.get("/all", response_model=list[BookOut])
+def get_books(
+        book_service: Annotated[BookService, Depends(Stub(BookService))],
+        skip: Annotated[int, Query()],
+        limit: Annotated[int, Query()]
+) -> list[Dataclass]:
+
+    books = book_service.get_books(skip, limit)
+    return [asdict(book) for book in books]
+
+
+@books_router.get("/verified", response_model=list[BookOut])
+def get_verified_books(
+        book_service: Annotated[BookService, Depends(Stub(BookService))],
+        skip: Annotated[int, Query()],
+        limit: Annotated[int, Query()]
+) -> list[Dataclass]:
+
+    books = book_service.get_verified_books(skip, limit)
+    return [asdict(book) for book in books]
+
+
 @books_router.get("/{book_id}", response_model=BookOut)
 def get_book(
         book_service: Annotated[BookService, Depends(Stub(BookService))],
@@ -25,17 +47,6 @@ def get_book(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
     return asdict(book)
-
-
-@books_router.get("/", response_model=list[BookOut])
-def get_books(
-        book_service: Annotated[BookService, Depends(Stub(BookService))],
-        skip: Annotated[int, Query()],
-        limit: Annotated[int, Query()]
-) -> list[Dataclass]:
-
-    books = book_service.get_books(skip, limit)
-    return [asdict(book) for book in books]
 
 
 @books_router.get("/user/{user_id}", response_model=list[BookOut])
@@ -66,6 +77,20 @@ def get_purchased_books(
 
     books = book_service.get_purchased_books(user_id)
     return [asdict(book) for book in books]
+
+
+@books_router.post("/verify/{book_id}", response_model=BookOut)
+def verify_book(
+        book_service: Annotated[BookService, Depends(Stub(BookService))],
+        book_id: int,
+) -> Dataclass:
+
+    book = book_service.verify_book(book_id)
+
+    if not book:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+    return asdict(book)
 
 
 @books_router.post("/", response_model=BookOut, status_code=status.HTTP_201_CREATED)

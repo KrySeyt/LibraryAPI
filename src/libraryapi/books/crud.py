@@ -18,6 +18,12 @@ class BookCrud:
         stmt = select(models.Book).order_by(desc(models.Book.id)).offset(skip).limit(limit)
         return list(self.db.scalars(stmt).all())
 
+    def get_verified_books(self, skip: int, limit: int) -> list[models.Book]:
+        stmt = (select(models.Book).where(models.Book.verified == True).  # noqa E712
+                offset(skip).limit(limit).order_by(desc(models.Book.id)))
+
+        return list(self.db.scalars(stmt).all())
+
     def get_user_books(self, user_id: int) -> list[models.Book]:
         stmt = select(models.Book).where(models.Book.owner_id == user_id)
         return list(self.db.scalars(stmt).all())
@@ -25,6 +31,17 @@ class BookCrud:
     def get_purchased_books(self, user_id: int) -> list[models.Book]:
         stmt = select(models.Book).join(models.books_users_purchasers_table).where(models.books_users_purchasers_table.columns.user_id == user_id)
         return list(self.db.scalars(stmt).all())
+
+    def verify_book(self, book_id: int) -> models.Book | None:
+        book = self.get_book(book_id)
+
+        if not book:
+            return None
+
+        book.verified = True
+        self.db.commit()
+
+        return book
 
     def add_book(self, book_in: schema.BookIn) -> models.Book:
         book = models.Book(**asdict(book_in))
