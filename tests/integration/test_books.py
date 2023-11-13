@@ -1,4 +1,4 @@
-def test_get_book(authorized_client):
+def test_get_book(authorized_client, client):
     input_data = {
         "name": "string",
         "author": "string",
@@ -7,7 +7,7 @@ def test_get_book(authorized_client):
         "owner_id": 1,
     }
 
-    authorized_client.post("/books", json=input_data)
+    book_id = authorized_client.post("/books", json=input_data).json()["id"]
 
     expected_result = {
         "id": 1,
@@ -18,7 +18,7 @@ def test_get_book(authorized_client):
         "owner_id": 1,
     }
 
-    response = authorized_client.get("/books/1")
+    response = client.get(f"/books/{book_id}")
 
     assert response.json() == expected_result
     assert response.status_code == 200
@@ -38,7 +38,7 @@ def test_get_books(authorized_client, client):
 
     expected_result = [
         {
-            "id": i,
+            "id": 11 - i,
             "name": "String",
             "author": "String",
             "genre": "String",
@@ -48,7 +48,7 @@ def test_get_books(authorized_client, client):
         for i in range(1, 11)
     ]
 
-    response = client.get("/books")
+    response = client.get("/books", params={"skip": 0, "limit": 100})
 
     assert response.json() == expected_result
     assert response.status_code == 200
@@ -239,7 +239,7 @@ def test_delete_book(client):
     response = client.delete(f"/books/{book_id}")
 
     assert response.json() == expected_result
-    assert not client.get("/books").json()
+    assert not client.get("/books", params={"skip": 0, "limit": 100}).json()
 
 
 def test_delete_book_without_permission(authorized_client, client):
@@ -274,3 +274,66 @@ def test_delete_book_without_permission(authorized_client, client):
 
     assert client.get("/books/1").json() == expected_result
     assert response.status_code == 403
+
+
+def test_buy_book(authorized_client, client):
+    book_input_data = {
+        "name": "string",
+        "author": "string",
+        "genre": "string",
+        "release_year": "2023-11-05",
+        "owner_id": 1,
+    }
+
+    book_id = authorized_client.post("/books", json=book_input_data).json()["id"]
+
+    user2_data = {
+        "username": "user",
+        "password": "password"
+    }
+
+    client.post("/users", json=user2_data).json()
+    client.post("/users/login", json=user2_data)
+
+    excepted_result = {
+        "name": "String",
+        "author": "String",
+        "genre": "String",
+        "release_year": "2023-11-05",
+        "owner_id": 1,
+        "id": 1,
+    }
+
+    response = client.post(f"/books/purchase/{book_id}")
+    assert response.status_code == 201
+
+    response = client.get("/books/purchased/me")
+    assert excepted_result in response.json()
+    assert response.status_code == 200
+
+
+def test_get_user_purchased_books(authorized_client, client):
+    book_input_data = {
+        "name": "string",
+        "author": "string",
+        "genre": "string",
+        "release_year": "2023-11-05",
+        "owner_id": 1,
+    }
+
+    book_id = authorized_client.post("/books", json=book_input_data).json()["id"]
+    authorized_client.post(f"/books/purchase/{book_id}", json=book_input_data)
+
+    excepted_result = {
+        "name": "String",
+        "author": "String",
+        "genre": "String",
+        "release_year": "2023-11-05",
+        "owner_id": 1,
+        "id": 1,
+    }
+
+    response = client.get("/books/purchased/1")
+    print(response.json())
+    assert excepted_result in response.json()
+    assert response.status_code == 200

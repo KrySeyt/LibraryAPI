@@ -14,7 +14,7 @@ class BookServiceImp(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_books(self) -> list[Book]:
+    def get_books(self, skip: int, limit: int) -> list[Book]:
         raise NotImplementedError
 
     @abstractmethod
@@ -22,7 +22,15 @@ class BookServiceImp(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def get_purchased_books(self, user_id: int) -> list[Book]:
+        raise NotImplementedError
+
+    @abstractmethod
     def add_book(self, book_in: BookIn) -> Book:
+        raise NotImplementedError
+
+    @abstractmethod
+    def add_book_purchaser(self, book_id: int, user_id: int) -> Book | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -46,17 +54,29 @@ class RDBMSBookServiceImp(BookServiceImp):
 
         return Book.from_object(book_model)
 
-    def get_books(self) -> list[Book]:
-        book_models = self.crud.get_books()
+    def get_books(self, skip: int, limit: int) -> list[Book]:
+        book_models = self.crud.get_books(skip, limit)
         return [Book.from_object(model) for model in book_models]
 
     def get_user_books(self, user_id: int) -> list[Book]:
         book_models = self.crud.get_user_books(user_id)
         return [Book.from_object(model) for model in book_models]
 
+    def get_purchased_books(self, user_id: int) -> list[Book]:
+        book_models = self.crud.get_purchased_books(user_id)
+        return [Book.from_object(model) for model in book_models]
+
     def add_book(self, book_in: BookIn) -> Book:
         book_model = self.crud.add_book(book_in)
         return Book.from_object(book_model)
+
+    def add_book_purchaser(self, book_id: int, user_id: int) -> Book | None:
+        updated_book_model = self.crud.add_book_purchaser(book_id, user_id)
+
+        if not updated_book_model:
+            return None
+
+        return Book.from_object(updated_book_model)
 
     def update_book(self, book_id: int, book_in: BookIn) -> Book | None:
         book_model = self.crud.update_book(book_id, book_in)
@@ -82,14 +102,20 @@ class BookService:
     def get_book(self, book_id: int) -> Book | None:
         return self.imp.get_book(book_id)
 
-    def get_books(self) -> list[Book]:
-        return self.imp.get_books()
+    def get_books(self, skip: int, limit: int) -> list[Book]:
+        return self.imp.get_books(skip, limit)
 
     def get_user_books(self, user_id: int) -> list[Book]:
         return self.imp.get_user_books(user_id)
 
+    def get_purchased_books(self, user_id: int) -> list[Book]:
+        return self.imp.get_purchased_books(user_id)
+
     def add_book(self, book_in: BookIn) -> Book:
         return self.imp.add_book(book_in)
+
+    def add_book_purchaser(self, book_id: int, user_id: int) -> Book | None:
+        return self.imp.add_book_purchaser(book_id, user_id)
 
     def update_book(self, book_id: int, book_in: BookIn) -> Book | None:
         return self.imp.update_book(book_id, book_in)

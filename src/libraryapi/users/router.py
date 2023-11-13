@@ -22,16 +22,17 @@ def get_me(
     return asdict(current_user)
 
 
-@users_router.get("/{user_id}", response_model=UserOut | None)
+@users_router.get("/{user_id}", response_model=UserOut)
 def get_user(
         user_service: Annotated[UserService, Depends(Stub(UserService))],
         user_id: int
-) -> Dataclass | None:
+) -> Dataclass:
 
     user = user_service.get_user_by_id(user_id)
 
     if not user:
         raise HTTPException(status_code=404)
+
     return asdict(user)
 
 
@@ -56,7 +57,7 @@ def login(
 
     requested_user = user_service.get_user_by_username(user_data.username)
 
-    if not requested_user:
+    if not requested_user:  # TODO: all this logic to specific components
         raise HTTPException(status_code=400, detail="Incorrect username or password")
 
     if not password_hasher.verify(user_data.password, requested_user.hashed_password):

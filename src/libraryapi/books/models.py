@@ -10,11 +10,11 @@ if TYPE_CHECKING:
     from ..users.models import User
 
 
-books_users_table = Table(
-    "books_users",
+books_users_purchasers_table = Table(
+    "books_users_purchasers",
     Base.metadata,
-    Column("books_id", ForeignKey("books.id"), primary_key=True),
-    Column("users_id", ForeignKey("users.id"), primary_key=True),
+    Column("book_id", ForeignKey("books.id"), primary_key=True),
+    Column("user_id", ForeignKey("users.id"), primary_key=True),
 )
 
 
@@ -32,6 +32,6 @@ class Book(Base):
     owner: Mapped["User"] = relationship(back_populates="owned_books")
 
     purchasers: Mapped[list["User"]] = relationship(
-        secondary=books_users_table,
+        secondary=books_users_purchasers_table,
         back_populates="purchased_books",
     )

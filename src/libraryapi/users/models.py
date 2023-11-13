@@ -19,6 +19,6 @@ class User(Base):
     owned_books: Mapped[list["Book"]] = relationship(back_populates="owner")
 
     purchased_books: Mapped[list["Book"]] = relationship(
-        secondary="books_users",
+        secondary="books_users_purchasers",
         back_populates="purchasers",
     )
