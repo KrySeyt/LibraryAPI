@@ -15,6 +15,7 @@ class User(Base):
 
     username: Mapped[str]
     hashed_password: Mapped[str]
+    is_admin: Mapped[bool] = mapped_column(default=False)
 
     owned_books: Mapped[list["Book"]] = relationship(back_populates="owner")
 

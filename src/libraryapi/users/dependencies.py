@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Type
 from dataclasses import asdict
 
 from fastapi import Depends, HTTPException, status, Request
@@ -47,8 +47,18 @@ def get_current_user(
     return user
 
 
+def get_current_admin(
+        current_user: Annotated[User, Depends(get_current_user)],
+) -> User:
+
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403)
+
+    return current_user
+
+
 def get_user_in(
-        password_hasher: Annotated[PasswordHash, Depends(Stub(PasswordHash))],
+        password_hasher: Annotated[Type[PasswordHash], Depends(Stub(PasswordHash))],
         raw_user: RawUserIn
 ) -> UserIn:
     user_data = asdict(raw_user)

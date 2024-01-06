@@ -16,6 +16,17 @@ class UserCrud:
     def get_user_by_id(self, user_id: int) -> models.User | None:
         return self.db.get(models.User, user_id)
 
+    def make_admin(self, user_id: int) -> models.User | None:
+        user = self.get_user_by_id(user_id)
+
+        if not user:
+            return None
+
+        user.is_admin = True
+        self.db.commit()
+
+        return user
+
     def get_user_by_username(self, username: str) -> models.User | None:
         return self.db.scalar(select(models.User).where(models.User.username == username))
 

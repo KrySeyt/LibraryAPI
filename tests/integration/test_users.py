@@ -9,6 +9,7 @@ def test_get_user(client):
     expected_result = {
         "id": 1,
         "username": "testusername",
+        "is_admin": False
     }
 
     response = client.get(f"/users/{user_id}")
@@ -54,6 +55,7 @@ def test_register(client):
     expected_result = {
         "id": 1,
         "username": "testusername",
+        "is_admin": False
     }
 
     response = client.post("/users", json=input_data)

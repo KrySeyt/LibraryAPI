@@ -12,6 +12,7 @@ class UserBase(BaseSchema):
 class User(UserBase):
     id: int
     hashed_password: str
+    is_admin: bool
 
 
 @dataclass
@@ -35,6 +36,7 @@ class UserIn(UserBase):
 @dataclass
 class UserOut(UserBase):
     id: int
+    is_admin: bool
 
 
 @dataclass

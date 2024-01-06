@@ -12,6 +12,7 @@ from ..books.crud import BookCrud
 from ..users.crud import UserCrud, RedisSessionCrud
 from ..users.security import SessionProvider
 from .config import get_postgres_config, get_redis_config
+from .common import create_admin
 
 
 def create_app() -> FastAPI:
@@ -36,6 +37,11 @@ def create_app() -> FastAPI:
 
     hasher = argon2
     app.dependency_overrides[PasswordHash] = lambda: hasher
+
+    gen = user_service_factory.create_user_service()
+    user_service = next(gen)
+    create_admin(user_service, hasher)
+    user_service.imp.crud.db.close()  # type: ignore
 
     return app
 

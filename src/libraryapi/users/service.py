@@ -18,6 +18,10 @@ class UserServiceImp(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def make_admin(self, user_id: int) -> User | None:
+        raise NotImplementedError
+
+    @abstractmethod
     def register(self, user: UserIn) -> User:
         raise NotImplementedError
 
@@ -42,6 +46,14 @@ class RDBMSUserServiceImp(UserServiceImp):
 
         return User.from_object(user_model)
 
+    def make_admin(self, user_id: int) -> User | None:
+        user_model = self.crud.make_admin(user_id)
+
+        if not user_model:
+            return None
+
+        return User.from_object(user_model)
+
     def register(self, user: UserIn) -> User:
         user_model = self.crud.create_user(user)
         return User.from_object(user_model)
@@ -56,6 +68,9 @@ class UserService:
 
     def get_user_by_username(self, username: str) -> User | None:
         return self.imp.get_user_by_username(username)
+
+    def make_admin(self, user_id: int) -> User | None:
+        return self.imp.make_admin(user_id)
 
     def register(self, user: UserIn) -> User:
         return self.imp.register(user)

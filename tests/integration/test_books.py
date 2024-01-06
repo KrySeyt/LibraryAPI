@@ -56,22 +56,23 @@ def test_get_all_books(authorized_client, client):
     assert response.status_code == 200
 
 
-def test_get_verified_books(authorized_client, client):
+def test_get_verified_books(admin_client, authorized_client, client):
     input_data = {
         "name": "string",
         "author": "string",
         "genre": "string",
         "release_year": "2023-11-05",
-        "owner_id": 1,
+        "owner_id": 2,
     }
 
     for _ in range(10):
-        authorized_client.post("/books", json=input_data)
+        response = authorized_client.post("/books", json=input_data)
+        assert response.status_code == 201
 
-    response = authorized_client.post("/books/verify/4")
+    response = admin_client.post("/books/verify/4")
     assert response.status_code == 200
 
-    authorized_client.post("/books/verify/9")
+    admin_client.post("/books/verify/9")
 
     expected_result = [
         {
@@ -80,7 +81,7 @@ def test_get_verified_books(authorized_client, client):
             "author": "String",
             "genre": "String",
             "release_year": "2023-11-05",
-            "owner_id": 1,
+            "owner_id": 2,
             "verified": True
         },
         {
@@ -89,7 +90,7 @@ def test_get_verified_books(authorized_client, client):
             "author": "String",
             "genre": "String",
             "release_year": "2023-11-05",
-            "owner_id": 1,
+            "owner_id": 2,
             "verified": True
         },
     ]

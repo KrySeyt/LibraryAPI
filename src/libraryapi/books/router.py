@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from .schema import BookIn, BookOut
 from .service import BookService
 from ..dependencies import Stub, Dataclass
-from ..users.dependencies import get_current_user
+from ..users.dependencies import get_current_user, get_current_admin
 from ..users.schema import User
 
 
@@ -16,8 +16,8 @@ books_router = APIRouter(tags=["books"], prefix="/books")
 @books_router.get("/all", response_model=list[BookOut])
 def get_books(
         book_service: Annotated[BookService, Depends(Stub(BookService))],
-        skip: Annotated[int, Query()],
-        limit: Annotated[int, Query()]
+        skip: Annotated[int, Query()] = 0,
+        limit: Annotated[int, Query()] = 100,
 ) -> list[Dataclass]:
 
     books = book_service.get_books(skip, limit)
@@ -82,6 +82,7 @@ def get_purchased_books(
 @books_router.post("/verify/{book_id}", response_model=BookOut)
 def verify_book(
         book_service: Annotated[BookService, Depends(Stub(BookService))],
+        current_admin: Annotated[User, Depends(get_current_admin)],
         book_id: int,
 ) -> Dataclass:
 
